@@ -1,0 +1,44 @@
+#include <LiquidCrystal.h>
+#include <SoftwareSerial.h>
+const int rs = 12, en = 6, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+int etat=0 ,etat2=1;
+const int cap1=7,cap2=8,cap3=9,cap4=13;
+SoftwareSerial Arduino_serial(10,11);
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+Servo inServo;
+void setup() {
+
+  Serial.begin(9600);
+  Arduino_serial.begin(9600);
+  pinMode(cap1,INPUT);
+  pinMode(cap2,INPUT);
+  pinMode(cap3,INPUT);
+  pinMode(cap4,INPUT);
+  // set up the LCD's number of columns and rows:
+  lcd.begin(16, 2);
+//  lcd.print("2 places dispo");
+}
+
+
+
+void loop(){
+  lcd.clear();
+  lcd.print(nbPlaceeDispo());
+  Arduino_serial.print(digitalRead(cap1)); Arduino_serial.print("c1");
+  Arduino_serial.print(digitalRead(cap2)); Arduino_serial.print("c2");
+  Arduino_serial.print(digitalRead(cap3)); Arduino_serial.print("c3");
+  Arduino_serial.print(digitalRead(cap4)); Arduino_serial.print("c4");
+  Arduino_serial.print(nbPlaceeDispo()); Arduino_serial.print("nb");
+  Arduino_serial.print("\n");
+  delay(500);
+}
+
+
+int nbPlaceeDispo(){
+  int nb=4;
+  if(digitalRead(cap1) == 0) nb--;
+  if(digitalRead(cap2) == 0) nb--;
+  if(digitalRead(cap3) == 0) nb--;
+  if(digitalRead(cap4) == 0) nb--;
+  return nb;
+}

@@ -1,0 +1,34 @@
+#include <LiquidCrystal.h>
+#include <SoftwareSerial.h>
+const int rs = 12, en = 6, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+char c;
+String dataIn;
+SoftwareSerial Arduino_serial(10,11);
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+void setup() {
+
+  Serial.begin(9600);
+  Arduino_serial.begin(9600);
+  lcd.begin(16, 2);
+}
+
+
+
+void loop(){
+  
+  while(Arduino_serial.available()>0){
+    c=Arduino_serial.read();
+    if(c=='\n') break;
+    else dataIn+=c;
+  }
+  if(c=='\n'){
+    lcd.clear();
+    lcd.print(dataIn+"places libres");
+    c=0;
+    dataIn="";
+  }
+  delay(500);
+}
+
+
+

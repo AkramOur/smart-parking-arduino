@@ -1,0 +1,92 @@
+#include <SoftwareSerial.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+#include <Servo.h>
+#include <FirebaseArduino.h>
+#define capServ D3
+#define cap1 D5
+#define cap2 D6
+#define cap3 D7
+#define cap4 D0
+
+const char* ssid = "HUAWEI-AP";
+const char* password = "@@0522354124@@";
+const char* firebase_host = "smartparking-147f9-default-rtdb.firebaseio.com";
+const char* firebase_auth = "PqdKw9zTujkmJK4Y4ctmT3JNVW5vvaJRv15At7Xc";
+
+SoftwareSerial NodeMcu_Serial(D1,D2);
+Servo inServo;
+char c;
+String dataIn;
+int8_t c1,c2,c3,c4;
+//String cap1,cap2,cap3,cap4;
+
+void setup() {
+  pinMode(capServ,INPUT);
+  pinMode(cap1,INPUT);
+  pinMode(cap2,INPUT);
+  pinMode(cap3,INPUT);
+  pinMode(cap4,INPUT);
+  inServo.attach(D4);
+  //inServo.write(0);
+  WiFi.begin(ssid,password);
+  Serial.begin(9600);
+  NodeMcu_Serial.begin(9600);
+  Serial.println("Connecting to ");
+  Serial.println(ssid);
+  while(WiFi.status() != WL_CONNECTED){
+    delay(1000);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("WiFi connected..!");
+  Serial.print("Got IP: ");  Serial.println(WiFi.localIP());
+   Serial.println("HTTP server started");
+   Firebase.begin(firebase_host,firebase_auth);
+}
+
+void loop() {
+  NodeMcu_Serial.print(nbPlaceeDispo());  NodeMcu_Serial.print(" \n");
+  if(digitalRead(capServ) == 0){
+    inServo.write(0);
+    delay(2000);
+    inServo.write(90);
+  }
+  putDataFirebase();
+}
+
+void putDataFirebase()
+{
+  Firebase.remove("place1");
+  Firebase.remove("place2");
+  Firebase.remove("place3");
+  Firebase.remove("place4");
+  delay(1000);
+  if(digitalRead(cap1) == 1)
+      Firebase.pushString("place1","libre");
+  else
+      Firebase.pushString("place1","reserve");
+  if(digitalRead(cap2) == 1)
+      Firebase.pushString("place2","libre");
+  else
+      Firebase.pushString("place2","reserve");
+  if(digitalRead(cap3) == 1)
+      Firebase.pushString("place3","libre");
+  else
+      Firebase.pushString("place3","reserve");
+  if(digitalRead(cap4) == 1)
+      Firebase.pushString("place4","libre");
+  else
+      Firebase.pushString("place4","reserve");
+}
+
+int nbPlaceeDispo(){
+  int nb=4;
+  if(digitalRead(cap1) == 0) nb--;
+  if(digitalRead(cap2) == 0) nb--;
+  if(digitalRead(cap3) == 0) nb--;
+  if(digitalRead(cap4) == 0) nb--;
+  return nb;
+}
+
+
